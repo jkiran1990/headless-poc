@@ -1,0 +1,5 @@
+{
+    "title": "Mocked Banner",
+    "description": "This data comes from the Next.js GraphQL mock!",
+    "imageUrl": "/mock-banner.jpg"
+}
