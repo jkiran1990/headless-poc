@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/authStore";
-import { API } from "@/lib/api";
-import Cookies from "js-cookie";
+import { Grid } from "@mui/material";
+import { loginAction } from "@/app/login/action";
 
 export default function LoginForm() {
   const router = useRouter();
-  const setToken = useAuthStore((state) => state.setToken);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -20,53 +18,53 @@ export default function LoginForm() {
     setError("");
     setLoading(true);
 
-    try {
-      const res = await fetch(API.login(), {
-        method: "POST",
-        body: JSON.stringify({ username, password }),
-      });
+    const result = await loginAction(username, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Login failed");
-        setLoading(false);
-        return;
-      }
-      Cookies.set("auth_token", "mock-token");
-      setToken("mock-token");
-
-      router.push("/dashboard");
-    } catch (err) {
-      setError("Something went wrong");
+    if (!result.success) {
+      setError(result.error || "Login failed");
+      setLoading(false);
+      return;
     }
-
+    router.push("/dashboard");
     setLoading(false);
   }
 
   return (
-    <form onSubmit={handleLogin} style={{ display: "grid", gap: 12, width: 280 }}>
+    <><form onSubmit={handleLogin} style={{ display: "grid", gap: 12, width: 280 }}>
       <input
         type="text"
         placeholder="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        required
-      />
+        required />
 
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+        required />
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <button type="submit" disabled={loading}>
         {loading ? "Logging in..." : "Login"}
       </button>
-    </form>
+      </form>
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 6, md: 8 }}>
+          <div>xs=6 md=8</div>
+        </Grid>
+        <Grid size={{ xs: 6, md: 4 }}>
+          <div>xs=6 md=4</div>
+        </Grid>
+        <Grid size={{ xs: 6, md: 4 }}>
+          <div>xs=6 md=4</div>
+        </Grid>
+        <Grid size={{ xs: 6, md: 8 }}>
+          <div>xs=6 md=8</div>
+        </Grid>
+      </Grid>
+  </>
   );
 }
