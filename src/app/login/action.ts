@@ -1,16 +1,17 @@
 "use server";
 
+import { API } from "@/lib/api";
 import { cookies } from "next/headers";
 
 interface LoginResult {
   success: boolean;
+  token?: string;
   error?: string;
 }
 
 export async function loginAction(username: string, password: string): Promise<LoginResult> {
   try {
-    // 🔹 Replace this with your actual backend API call
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/login`, {
+    const res = await fetch(API.login(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -21,14 +22,16 @@ export async function loginAction(username: string, password: string): Promise<L
     if (!res.ok) {
       return { success: false, error: json.error || "Login failed" };
     }
+    const cookieStore = await cookies();
 
-    // 🔹 Set HttpOnly cookie server-side
-    cookies().set("auth_token", json.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
+    cookieStore.set({
+        name: "auth_token",
+        value: json.token,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        sameSite: "lax",
     });
-
     return { success: true };
   } catch (err) {
     console.error("Login error:", err);
